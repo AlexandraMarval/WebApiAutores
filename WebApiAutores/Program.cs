@@ -1,4 +1,4 @@
-using WebApiAutores;
+using WebAPIAutores;
 
 var builder = WebApplication.CreateBuilder(args);
 

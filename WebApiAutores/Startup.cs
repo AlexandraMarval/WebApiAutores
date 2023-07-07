@@ -1,4 +1,4 @@
-﻿namespace WebApiAutores
+﻿namespace WebAPIAutores
 {
 	public class Startup
 	{
