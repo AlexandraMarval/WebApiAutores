@@ -34,5 +34,14 @@ namespace WebAPIAutores.Controllers
 			await context.SaveChangesAsync();
 			return Ok();
 		}
+
+		[HttpPut]
+
+		public async Task<ActionResult> PutLibro(Libro libro)
+		{			
+			context.Update(libro);
+			await context.SaveChangesAsync();
+			return Ok();
+		}
     }
 }

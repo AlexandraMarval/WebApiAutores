@@ -1,27 +1,62 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPIAutores.Entidades;
+using WebAPIAutores.Filtros;
+using WebAPIAutores.Servicios;
+using static WebAPIAutores.Servicios.ServicioB;
 
 namespace WebAPIAutores.Controllers
 {
-	[ApiController]
-	[Route("api/autores")]
+    [ApiController]
+	[Route("api/autores")]	
 	public class AutoresController: ControllerBase
 	{
 		private readonly ApplicationDbContext context;
+		private readonly IService service;
+		private readonly ServicioTransient servicioTransient;
+		private readonly ServicioSingleton servicioSingleton;
+		private readonly ServicioScoped servicioScoped;
+		private readonly ILogger<AutoresController> logger;
 
-		public AutoresController(ApplicationDbContext context)
+		public AutoresController(ApplicationDbContext context, IService service, ServicioTransient servicioTransient, ServicioSingleton servicioSingleton, ServicioScoped servicioScoped, ILogger<AutoresController> logger)
         {
 			this.context = context;
+			this.service = service;
+			this.servicioTransient = servicioTransient;
+			this.servicioSingleton = servicioSingleton;
+			this.servicioScoped = servicioScoped;
+			this.logger = logger;
 		}
-		// Solo podemos utilizar la promagracion Asincrona cuando se quiere hacer peticiones en la webApi en la base datos cuando se encuenta enotro servidor, en la webApi de facebook, Google
-        [HttpGet]
-		public async Task<ActionResult<List<Autor>>> GetAutor()
+		// Solo podemos utilizar la promagracion Asincrona cuando se quiere hacer peticiones en la webApi en la base datos cuando se encuenta en otro servidor, en la webApi de facebook, Google
+		[HttpGet("GUID")]
+		// Este ResponseCache nos permite que la pedicion que el usuario haga se mantenga durante 10minutos es un Filtro 
+		//[ResponseCache(Duration = 10)]
+		//[ServiceFilter(typeof(MiFiltroDeAccion))]
+		public ActionResult ObtenerGuids()
 		{
+			return Ok(new
+			{
+				AutoresControllerTramsient = servicioTransient.Guid,
+				ServicioA_Transient = service.ObtenerTransient(),
+				AutoresControllerScoped = servicioScoped.Guid,
+				ServicioA_Scoped = service.ObtenerScoped(),
+				AutoresControllerSingleton = servicioSingleton.Guid,
+				ServicioA_Singleton = service.ObtenerSingleton(),
+			});
+		}
+
+        [HttpGet("listado")]
+		//[ResponseCache(Duration = 10)]
+		//[ServiceFilter(typeof(MiFiltroDeAccion))]
+		public async Task<ActionResult<List<Autor>>> GetAutor()
+		{			
+			logger.LogInformation("Estamos obteniendo los autores");
+			logger.LogWarning("Este es un mensaje de prueba");
 			return await context.Autores.Include(x => x.Libros).ToListAsync();
 		}
 
-		[HttpGet("primeri")]// Model Binding
+		[HttpGet("primero")]// Model Binding
 		public async Task<ActionResult<Autor>> PrimerAutor([FromHeader] int miValor )
 		{
 			return await context.Autores.FirstOrDefaultAsync();
@@ -44,6 +79,13 @@ namespace WebAPIAutores.Controllers
 		[HttpPost]
 		public async Task<ActionResult> PostAutor([FromBody] Autor autor)
 		{
+			var existeAutorConElMismoNombre = await context.Autores.AnyAsync(autor => autor.Nombre == autor.Nombre);
+
+			if (existeAutorConElMismoNombre)
+			{
+				return BadRequest($"Ya existe un autor con el mismo nombre {autor.Nombre}");
+			}
+
 			context.Add(autor);
 			await context.SaveChangesAsync();
 			return Ok();
