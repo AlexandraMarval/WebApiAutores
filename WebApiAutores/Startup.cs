@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using WebAPIAutores.Filtros;
 using WebAPIAutores.Middleware;
@@ -44,6 +45,8 @@ namespace WebAPIAutores
 
 			services.AddEndpointsApiExplorer();
 			services.AddSwaggerGen();
+
+			services.AddAutoMapper(typeof(Startup));
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
@@ -53,7 +56,7 @@ namespace WebAPIAutores
 
 			//app.UseMiddleware<LoguearRespuestaHTTPMiddleware>();
 			app.UseLoguearRespuestaHTTP();
-			
+
 			app.Map("/ruta1", app =>
 			{
 				app.Run(async contexto =>

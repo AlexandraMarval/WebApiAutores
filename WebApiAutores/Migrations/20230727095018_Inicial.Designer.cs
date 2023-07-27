@@ -11,7 +11,7 @@ using WebAPIAutores;
 namespace WebAPIAutores.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230710114018_Inicial")]
+    [Migration("20230727095018_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -19,7 +19,7 @@ namespace WebAPIAutores.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,14 +33,16 @@ namespace WebAPIAutores.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Nombre")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Autores");
                 });
 
-            modelBuilder.Entity("WebAPIAutores.Entidades.Persona", b =>
+            modelBuilder.Entity("WebAPIAutores.Entidades.Libro", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,12 +50,34 @@ namespace WebAPIAutores.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Nombre")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AutorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Titulo")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personas");
+                    b.HasIndex("AutorId");
+
+                    b.ToTable("Libros");
+                });
+
+            modelBuilder.Entity("WebAPIAutores.Entidades.Libro", b =>
+                {
+                    b.HasOne("WebAPIAutores.Entidades.Autor", "Autor")
+                        .WithMany("Libros")
+                        .HasForeignKey("AutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Autor");
+                });
+
+            modelBuilder.Entity("WebAPIAutores.Entidades.Autor", b =>
+                {
+                    b.Navigation("Libros");
                 });
 #pragma warning restore 612, 618
         }

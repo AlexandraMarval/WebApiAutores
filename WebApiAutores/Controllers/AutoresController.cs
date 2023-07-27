@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebAPIAutores.DTOs;
 using WebAPIAutores.Entidades;
 using WebAPIAutores.Filtros;
 using WebAPIAutores.Servicios;
@@ -9,7 +11,8 @@ using static WebAPIAutores.Servicios.ServicioB;
 namespace WebAPIAutores.Controllers
 {
     [ApiController]
-	[Route("api/autores")]	
+	[Route("api/autores")]
+	//[Authorize]
 	public class AutoresController: ControllerBase
 	{
 		private readonly ApplicationDbContext context;
@@ -18,8 +21,9 @@ namespace WebAPIAutores.Controllers
 		private readonly ServicioSingleton servicioSingleton;
 		private readonly ServicioScoped servicioScoped;
 		private readonly ILogger<AutoresController> logger;
+		private readonly IMapper mapper;
 
-		public AutoresController(ApplicationDbContext context, IService service, ServicioTransient servicioTransient, ServicioSingleton servicioSingleton, ServicioScoped servicioScoped, ILogger<AutoresController> logger)
+		public AutoresController(ApplicationDbContext context, IService service, ServicioTransient servicioTransient, ServicioSingleton servicioSingleton, ServicioScoped servicioScoped, ILogger<AutoresController> logger, IMapper mapper)
         {
 			this.context = context;
 			this.service = service;
@@ -27,6 +31,7 @@ namespace WebAPIAutores.Controllers
 			this.servicioSingleton = servicioSingleton;
 			this.servicioScoped = servicioScoped;
 			this.logger = logger;
+			this.mapper = mapper;
 		}
 		// Solo podemos utilizar la promagracion Asincrona cuando se quiere hacer peticiones en la webApi en la base datos cuando se encuenta en otro servidor, en la webApi de facebook, Google
 		[HttpGet("GUID")]
@@ -77,14 +82,16 @@ namespace WebAPIAutores.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> PostAutor([FromBody] Autor autor)
+		public async Task<ActionResult> PostAutor([FromBody] AutorCreacionDTO autorCreacionDTO)
 		{
-			var existeAutorConElMismoNombre = await context.Autores.AnyAsync(autor => autor.Nombre == autor.Nombre);
+			var existeAutorConElMismoNombre = await context.Autores.AnyAsync(autor => autor.Nombre == autorCreacionDTO.Nombre);
 
 			if (existeAutorConElMismoNombre)
 			{
-				return BadRequest($"Ya existe un autor con el mismo nombre {autor.Nombre}");
+				return BadRequest($"Ya existe un autor con el mismo nombre {autorCreacionDTO.Nombre}");
 			}
+
+			var autor = mapper.Map<Autor>(autorCreacionDTO);			
 
 			context.Add(autor);
 			await context.SaveChangesAsync();
