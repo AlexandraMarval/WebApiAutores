@@ -62,14 +62,15 @@ namespace WebAPIAutores.Controllers
 		}
 
 		[HttpGet("primero")]// Model Binding
-		public async Task<ActionResult<Autor>> PrimerAutor([FromHeader] int miValor )
+		public async Task<ActionResult<List<Autor>>> PrimerAutor([FromHeader] int miValor )
 		{
-			return await context.Autores.FirstOrDefaultAsync();
+			var autores = await context.Autores.ToListAsync();
+			return mapper.Map<List<Autor>>(autores);
 		}
 		// podemos poner rutas con restricciones o podemos poner ruta opcionales o lo que queramos
 		// El NotFound hereda de ActionResult/ La diferencia de ActionResult de T a IActionResult es que con IActionResult no puedo retornar  un autor 
 		[HttpGet("{id:int}")]
-		public async Task<ActionResult<Autor>> GetPrimerAutor(int id)
+		public async Task<ActionResult<AutorDTO>> GetPrimerAutor(int id)
 		{																
 			var autor = await context.Autores.FirstOrDefaultAsync(autor => autor.Id == id);
 
@@ -78,7 +79,15 @@ namespace WebAPIAutores.Controllers
 				return NotFound();
 			}
 
-			return autor;
+			return mapper.Map<AutorDTO>(autor);	
+		}
+
+		[HttpGet("nombre")]
+		public async Task<ActionResult<List<AutorDTO>>> GetNombreAutor(string nombre)
+		{
+			var autores = await context.Autores.Where(autor => autor.Nombre.Contains(nombre)).ToListAsync();
+
+			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
 		[HttpPost]

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPIAutores;
 
@@ -11,9 +12,11 @@ using WebAPIAutores;
 namespace WebAPIAutores.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230731101951_Inical")]
+    partial class Inical
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,27 +43,6 @@ namespace WebAPIAutores.Migrations
                     b.ToTable("Autores");
                 });
 
-            modelBuilder.Entity("WebAPIAutores.Entidades.Comentario", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Contenido")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("LibroId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LibroId");
-
-                    b.ToTable("Comentarios");
-                });
-
             modelBuilder.Entity("WebAPIAutores.Entidades.Libro", b =>
                 {
                     b.Property<int>("Id")
@@ -73,7 +55,6 @@ namespace WebAPIAutores.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Titulo")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -82,17 +63,6 @@ namespace WebAPIAutores.Migrations
                     b.HasIndex("AutorId");
 
                     b.ToTable("Libros");
-                });
-
-            modelBuilder.Entity("WebAPIAutores.Entidades.Comentario", b =>
-                {
-                    b.HasOne("WebAPIAutores.Entidades.Libro", "Libro")
-                        .WithMany("Comentarios")
-                        .HasForeignKey("LibroId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Libro");
                 });
 
             modelBuilder.Entity("WebAPIAutores.Entidades.Libro", b =>
@@ -105,11 +75,6 @@ namespace WebAPIAutores.Migrations
             modelBuilder.Entity("WebAPIAutores.Entidades.Autor", b =>
                 {
                     b.Navigation("Libros");
-                });
-
-            modelBuilder.Entity("WebAPIAutores.Entidades.Libro", b =>
-                {
-                    b.Navigation("Comentarios");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,7 +5,7 @@
 namespace WebAPIAutores.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Inical : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,7 +30,7 @@ namespace WebAPIAutores.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Titulo = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    AutorId = table.Column<int>(type: "int", nullable: false)
+                    AutorId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,8 +39,7 @@ namespace WebAPIAutores.Migrations
                         name: "FK_Libros_Autores_AutorId",
                         column: x => x.AutorId,
                         principalTable: "Autores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
