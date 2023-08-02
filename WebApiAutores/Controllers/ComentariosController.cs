@@ -20,11 +20,18 @@ namespace WebAPIAutores.Controllers
 			this.mapper = mapper;
 		}
 		[HttpGet]
-		public async Task<ActionResult> GetComentarios()
+		public async Task<ActionResult<List<ComentarioDTO>>> GetComentarios(int libroId)
 		{
+			var existeLibro = await context.Libros.AnyAsync(libro => libroId == libroId);
 
-
+			if (!existeLibro)
+			{
+				return NotFound("");
+			}
+			var comentarios = await context.Comentarios.Where(comentario => comentario.LibroId == libroId).ToListAsync();
+			return mapper.Map<List<ComentarioDTO>>(comentarios);
 		}
+
 		[HttpPost]
 		public async Task<ActionResult> PostComentario(int libroId, ComentarioCreacionDTO comentarioCreacionDTO)
 		{

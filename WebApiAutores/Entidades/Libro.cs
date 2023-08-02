@@ -11,7 +11,6 @@ namespace WebAPIAutores.Entidades
         [StringLength(maximumLength: 250)]
         public string Titulo { get; set; }
         public List<Comentario> Comentarios { get; set; }
-        //public int AutorId { get; set; }
-        //public Autor Autor { get; set; }
+        public List<AutoreLibro> AutoresLibros { get; set; }
     }
 }

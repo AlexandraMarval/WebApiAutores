@@ -12,6 +12,7 @@ namespace WebAPIAutores.Entidades
 		// Personalizar atributos
 		//[PrimeraLetraMayuscula]
         public string Nombre { get; set; }
+		public List<AutoreLibro> AutoresLibros { get; set; }
 		//[Range(18, 68)]
 		//[NotMapped]
   //      public int Edad { get; set; }

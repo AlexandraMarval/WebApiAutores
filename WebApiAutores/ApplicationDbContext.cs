@@ -10,8 +10,16 @@ namespace WebAPIAutores
 
 		}
 
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<AutoreLibro>().HasKey(autorlibro => new {autorlibro.AutorId, autorlibro.LibroId});
+		}
+
 		public DbSet<Autor> Autores { get; set; }	
 		public DbSet<Libro> Libros { get; set; }	
 		public DbSet<Comentario> Comentarios { get; set; }	
+		public DbSet<AutoreLibro> AutoresLibros { get; set; }
 	}
 }
