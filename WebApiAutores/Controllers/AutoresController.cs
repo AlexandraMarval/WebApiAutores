@@ -22,8 +22,9 @@ namespace WebAPIAutores.Controllers
 		private readonly ServicioScoped servicioScoped;
 		private readonly ILogger<AutoresController> logger;
 		private readonly IMapper mapper;
+		private readonly IConfiguration configuration;
 
-		public AutoresController(ApplicationDbContext context, IService service, ServicioTransient servicioTransient, ServicioSingleton servicioSingleton, ServicioScoped servicioScoped, ILogger<AutoresController> logger, IMapper mapper)
+		public AutoresController(ApplicationDbContext context, IService service, ServicioTransient servicioTransient, ServicioSingleton servicioSingleton, ServicioScoped servicioScoped, ILogger<AutoresController> logger, IMapper mapper, IConfiguration configuration )
         {
 			this.context = context;
 			this.service = service;
@@ -32,33 +33,41 @@ namespace WebAPIAutores.Controllers
 			this.servicioScoped = servicioScoped;
 			this.logger = logger;
 			this.mapper = mapper;
+			this.configuration = configuration;
 		}
 		// Solo podemos utilizar la promagracion Asincrona cuando se quiere hacer peticiones en la webApi en la base datos cuando se encuenta en otro servidor, en la webApi de facebook, Google
 		[HttpGet("GUID")]
 		// Este ResponseCache nos permite que la pedicion que el usuario haga se mantenga durante 10minutos es un Filtro 
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
-		public ActionResult ObtenerGuids()
+		//public ActionResult ObtenerGuids()
+		//{
+		//	return Ok(new
+		//	{
+		//		AutoresControllerTramsient = servicioTransient.Guid,
+		//		ServicioA_Transient = service.ObtenerTransient(),
+		//		AutoresControllerScoped = servicioScoped.Guid,
+		//		ServicioA_Scoped = service.ObtenerScoped(),
+		//		AutoresControllerSingleton = servicioSingleton.Guid,
+		//		ServicioA_Singleton = service.ObtenerSingleton(),
+		//	});
+		//}
+
+		[HttpGet("configuraciones")]
+		public ActionResult<string> ObtenerConfiguracion()
 		{
-			return Ok(new
-			{
-				AutoresControllerTramsient = servicioTransient.Guid,
-				ServicioA_Transient = service.ObtenerTransient(),
-				AutoresControllerScoped = servicioScoped.Guid,
-				ServicioA_Scoped = service.ObtenerScoped(),
-				AutoresControllerSingleton = servicioSingleton.Guid,
-				ServicioA_Singleton = service.ObtenerSingleton(),
-			});
+			return configuration["apellido"];
 		}
 
         [HttpGet("listado")]
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
-		public async Task<ActionResult<List<Autor>>> GetAutor()
+		public async Task<ActionResult<List<AutorDTO>>> GetAutor()
 		{			
-			logger.LogInformation("Estamos obteniendo los autores");
-			logger.LogWarning("Este es un mensaje de prueba");
-			return await context.Autores.Include(x => x.Libros).ToListAsync();
+		//	logger.LogInformation("Estamos obteniendo los autores");
+		//	logger.LogWarning("Este es un mensaje de prueba");
+			var autores = await context.Autores.ToListAsync();
+			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
 		[HttpGet("primero")]// Model Binding
@@ -69,17 +78,21 @@ namespace WebAPIAutores.Controllers
 		}
 		// podemos poner rutas con restricciones o podemos poner ruta opcionales o lo que queramos
 		// El NotFound hereda de ActionResult/ La diferencia de ActionResult de T a IActionResult es que con IActionResult no puedo retornar  un autor 
-		[HttpGet("{id:int}")]
-		public async Task<ActionResult<AutorDTO>> GetPrimerAutor(int id)
+
+		[HttpGet("{id:int}", Name ="obtenerAutorId")]
+		public async Task<ActionResult<AutorDTOConLibros>> GetPrimerAutor(int id)
 		{																
-			var autor = await context.Autores.FirstOrDefaultAsync(autor => autor.Id == id);
+			var autor = await context.Autores
+				.Include(autor => autor.AutoresLibros)
+				.ThenInclude(autorLibro  => autorLibro.Libro)
+				.FirstOrDefaultAsync(autor => autor.Id == id);
 
 			if (autor == null)
 			{
 				return NotFound();
 			}
 
-			return mapper.Map<AutorDTO>(autor);	
+			return mapper.Map<AutorDTOConLibros>(autor);	
 		}
 
 		[HttpGet("nombre")]
@@ -104,26 +117,27 @@ namespace WebAPIAutores.Controllers
 
 			context.Add(autor);
 			await context.SaveChangesAsync();
-			return Ok();
+
+			var autorDTO = mapper.Map<AutorDTO>(autor);
+
+			return CreatedAtRoute("obtenerAutorId", new { id = autor.Id}, autorDTO);
 		}
 
 		[HttpPut("{id:int}")]
-		public async Task<ActionResult> PutActualizarActores(Autor autor, int id)
-		{
-			if(autor.Id != id)
-			{
-				return BadRequest("El id del autor no coincide con el id de la URL");
-			}
-
+		public async Task<ActionResult> PutActualizarActores(AutorCreacionDTO autorCreacionDTO, int id)
+		{		
 			var existe = await context.Autores.AnyAsync(autor => autor.Id == id);
 
 			if (!existe)
 			{
 				return NotFound();
 			}
+			var autor = mapper.Map<Autor>(autorCreacionDTO);
+			autor.Id = id;
+
 			context.Update(autor);
 			await context.SaveChangesAsync();
-			return Ok();
+			return NoContent();
 		}
 
 		[HttpDelete("{id:int}")]
@@ -136,7 +150,7 @@ namespace WebAPIAutores.Controllers
 			}
 			context.Remove(new Autor() { Id = id });
 			await context.SaveChangesAsync();
-			return Ok();
+			return NoContent();
 		}
 
 	}

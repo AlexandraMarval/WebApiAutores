@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Azure;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPIAutores.DTOs;
@@ -20,11 +22,16 @@ namespace WebAPIAutores.Controllers
 		}
 
 		[HttpGet("{id:int}")]
-		public async Task<ActionResult<LibroDTO>> GetLibro(int id)
+		public async Task<ActionResult<LibroDTOConAutores>> GetLibro(int id)
 		{
-			var Libro = await context.Libros.Include(libro => libro.AutoresLibros).ThenInclude(autorLibro => autorLibro.Autor).FirstOrDefaultAsync(libro => libro.Id == id);
-			Libro.AutoresLibros = Libro.AutoresLibros.OrderBy(libro => libro.Orden).ToList();
-			return mapper.Map<LibroDTO>(Libro);
+			var libro = await context.Libros.Include(libro => libro.AutoresLibros).ThenInclude(autorLibro => autorLibro.Autor).FirstOrDefaultAsync(libro => libro.Id == id);
+
+			if (libro == null)
+			{
+				return NotFound();
+			}
+			libro.AutoresLibros = libro.AutoresLibros.OrderBy(libro => libro.Orden).ToList();
+			return mapper.Map<LibroDTOConAutores>(libro);
 		}
 
 		[HttpPost]
@@ -43,26 +50,84 @@ namespace WebAPIAutores.Controllers
 			}
 			
 			var libro = mapper.Map<Libro>(libroCreacionDTO);
+			AsignarOrdenAutores(libro);
+			
+			context.Add(libro);
+			await context.SaveChangesAsync();
+			return Ok();
+		}
 
-			if (libro.AutoresLibros != null )
+		[HttpPut] 
+		public async Task<ActionResult> PutLibro(int id, LibroCreacionDTO libroCreacionDTO)
+		{
+			var libro = await context.Libros.Include(libro => libro.AutoresLibros).FirstOrDefaultAsync(libro => libro.Id == id);
+
+			if (libro == null)
+			{
+				return NotFound();
+			}
+
+			libro = mapper.Map(libroCreacionDTO, libro);
+			AsignarOrdenAutores(libro);
+			
+			await context.SaveChangesAsync();
+			return NoContent();
+		}
+
+		private void AsignarOrdenAutores(Libro libro)
+		{
+			if (libro.AutoresLibros != null)
 			{
 				for (int i = 0; i < libro.AutoresLibros.Count; i++)
 				{
 					libro.AutoresLibros[i].Orden = i;
 				}
 			}
-			context.Add(libro);
-			await context.SaveChangesAsync();
-			return Ok();
 		}
 
-		[HttpPut]
+		[HttpPatch("id:int")]
+		public async Task<ActionResult> Patch(int id, JsonPatchDocument<LibroPatchDTO> patchDocument)
+		{
+			if (patchDocument == null)
+			{
+				return BadRequest();
+			}
 
-		public async Task<ActionResult> PutLibro(Libro libro)
-		{			
-			context.Update(libro);
+			var libro = await context.Libros.FirstOrDefaultAsync(libro
+				 => libro.Id == id);
+
+			if (libro == null)
+			{
+				return NotFound();
+			}
+
+			var libroDTO = mapper.Map<LibroPatchDTO>(libro);
+
+			patchDocument.ApplyTo(libroDTO, ModelState);
+
+			var esValido = TryValidateModel(libro);
+
+			if (!esValido)
+			{
+				return BadRequest();
+			}
+			mapper.Map(libroDTO, libro);
+
 			await context.SaveChangesAsync();
-			return Ok();
+			return NoContent();
 		}
-    }
+
+		[HttpDelete("{id:int}")]
+		public async Task<ActionResult> DeleteLibro(int id)
+		{
+			var existe = await context.Libros.AnyAsync(libro => libro.Id == id);
+			if (!existe)
+			{
+				return NotFound();
+			}
+			context.Remove(new Libro() { Id = id });
+			await context.SaveChangesAsync();
+			return NoContent();
+		}
+	}
 }

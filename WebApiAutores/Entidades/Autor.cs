@@ -15,14 +15,14 @@ namespace WebAPIAutores.Entidades
 		public List<AutoreLibro> AutoresLibros { get; set; }
 		//[Range(18, 68)]
 		//[NotMapped]
-  //      public int Edad { get; set; }
+		//      public int Edad { get; set; }
 		//[CreditCard]
 		//[NotMapped]
 		//public string TarjetaDeCredito { get; set; }
 		//[Url]
 		//[NotMapped]
 		//public string Url  { get; set; }
-        public List<Libro> Libros { get; set; }
+		public List<Libro> Libros { get; set; }
 
 		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
 		{
