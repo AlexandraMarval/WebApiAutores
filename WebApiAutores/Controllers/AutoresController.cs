@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ namespace WebAPIAutores.Controllers
 			this.configuration = configuration;
 		}
 		// Solo podemos utilizar la promagracion Asincrona cuando se quiere hacer peticiones en la webApi en la base datos cuando se encuenta en otro servidor, en la webApi de facebook, Google
-		[HttpGet("GUID")]
+		//[HttpGet("GUID")]
 		// Este ResponseCache nos permite que la pedicion que el usuario haga se mantenga durante 10minutos es un Filtro 
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
@@ -56,10 +57,11 @@ namespace WebAPIAutores.Controllers
 		[HttpGet("configuraciones")]
 		public ActionResult<string> ObtenerConfiguracion()
 		{
-			return configuration["apellido"];
+			return configuration["nombre"];
 		}
 
-        [HttpGet("listado")]
+		[HttpGet("listado")]
+		//[Authorize]
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
 		public async Task<ActionResult<List<AutorDTO>>> GetAutor()
@@ -70,7 +72,8 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
-		[HttpGet("primero")]// Model Binding
+		[HttpGet]// Model Binding/
+		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 		public async Task<ActionResult<List<Autor>>> PrimerAutor([FromHeader] int miValor )
 		{
 			var autores = await context.Autores.ToListAsync();
