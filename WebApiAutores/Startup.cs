@@ -43,7 +43,7 @@ namespace WebAPIAutores
 			services.AddTransient<ServicioTransient>();
 			services.AddScoped<ServicioScoped>();
 			services.AddTransient<MiFiltroDeAccion>();
-			services.AddHostedService<EscribirEnArchivo>();
+			//services.AddHostedService<EscribirEnArchivo>();
 
 			services.AddResponseCaching();
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters

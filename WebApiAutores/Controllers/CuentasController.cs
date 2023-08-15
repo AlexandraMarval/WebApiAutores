@@ -55,10 +55,10 @@ namespace WebAPIAutores.Controllers
 
 		private RespuestasAutenticacionDTO ConstruirToken(CredencialesUsuario credencialesUsuario)
 		{
-			var claims = new List<Claim>();
+			var claims = new List<Claim>
 			{
-				new Claim("email", credencialesUsuario.Email);			
-				new Claim("lo que yo quiera", "Cualquier otro valor");			
+				new Claim(ClaimTypes.Email, credencialesUsuario.Email),		
+				new Claim("lo que yo quiera", "Cualquier otro valor")			
 			};
 			var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
 			var credenciales = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);

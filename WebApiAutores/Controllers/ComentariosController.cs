@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using WebAPIAutores.DTOs;
 using WebAPIAutores.Entidades;
 
@@ -56,7 +57,8 @@ namespace WebAPIAutores.Controllers
 		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 		public async Task<ActionResult> PostComentario(int libroId, ComentarioCreacionDTO comentarioCreacionDTO)
 		{
-			var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault();
+			var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.Email)
+				.FirstOrDefault();
 			var email = emailClaim.Value;
 			var usuario = await userManager.FindByEmailAsync(email);
 			var usuarioId = usuario.Id;
