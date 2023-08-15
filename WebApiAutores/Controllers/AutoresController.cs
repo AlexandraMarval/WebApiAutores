@@ -14,6 +14,7 @@ namespace WebAPIAutores.Controllers
     [ApiController]
 	[Route("api/autores")]
 	//[Authorize]
+	[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 	public class AutoresController: ControllerBase
 	{
 		private readonly ApplicationDbContext context;
@@ -55,12 +56,13 @@ namespace WebAPIAutores.Controllers
 		//}
 
 		[HttpGet("configuraciones")]
+		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 		public ActionResult<string> ObtenerConfiguracion()
 		{
 			return configuration["nombre"];
 		}
 
-		[HttpGet("listado")]
+		[HttpGet("listado")]		
 		//[Authorize]
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
@@ -72,8 +74,7 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
-		[HttpGet]// Model Binding/
-		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+		[HttpGet]// Model Binding/		
 		public async Task<ActionResult<List<Autor>>> PrimerAutor([FromHeader] int miValor )
 		{
 			var autores = await context.Autores.ToListAsync();
@@ -83,6 +84,7 @@ namespace WebAPIAutores.Controllers
 		// El NotFound hereda de ActionResult/ La diferencia de ActionResult de T a IActionResult es que con IActionResult no puedo retornar  un autor 
 
 		[HttpGet("{id:int}", Name ="obtenerAutorId")]
+		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 		public async Task<ActionResult<AutorDTOConLibros>> GetPrimerAutor(int id)
 		{																
 			var autor = await context.Autores
@@ -99,6 +101,7 @@ namespace WebAPIAutores.Controllers
 		}
 
 		[HttpGet("nombre")]
+		[AllowAnonymous] // Se utiliza para las personas que no necesitan autenticarse
 		public async Task<ActionResult<List<AutorDTO>>> GetNombreAutor(string nombre)
 		{
 			var autores = await context.Autores.Where(autor => autor.Nombre.Contains(nombre)).ToListAsync();
