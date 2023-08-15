@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -52,6 +54,20 @@ namespace WebAPIAutores.Controllers
 				return BadRequest("Login Incorrecto");
 			}
 		}
+		[HttpGet("RenovarToken")]
+		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+		public ActionResult<RespuestasAutenticacionDTO> Renovar()
+		{
+			var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.Email)
+				.FirstOrDefault();
+			var email = emailClaim.Value;
+			var credencialesUsuario = new CredencialesUsuario() 
+			{
+				Email = email
+			};
+
+			return ConstruirToken(credencialesUsuario);
+		}
 
 		private RespuestasAutenticacionDTO ConstruirToken(CredencialesUsuario credencialesUsuario)
 		{
@@ -62,6 +78,7 @@ namespace WebAPIAutores.Controllers
 			};
 			var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
 			var credenciales = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
+
 			var expiracion = DateTime.UtcNow.AddYears(1);
 
 			var securityToken = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expiracion, signingCredentials: credenciales);
@@ -71,6 +88,22 @@ namespace WebAPIAutores.Controllers
 				Token = new JwtSecurityTokenHandler().WriteToken(securityToken),
 				Expiracion = expiracion
 			};
+		}
+
+		[HttpPost("HacerAdmin")]
+		public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
+		{
+			var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+			await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));
+			return NoContent();
+		}
+
+		[HttpPost("RemoverAdmin")]
+		public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
+		{
+			var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+			await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "1"));
+			return NoContent();
 		}
 	}
 }

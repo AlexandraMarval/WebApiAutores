@@ -14,10 +14,10 @@ using static WebAPIAutores.Servicios.ServicioB;
 
 namespace WebAPIAutores
 {
-    public class Startup
+	public class Startup
 	{
-        public Startup(IConfiguration configuration)
-        {
+		public Startup(IConfiguration configuration)
+		{
 			JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 			Configuration = configuration;
 		}
@@ -54,7 +54,7 @@ namespace WebAPIAutores
 				ValidateIssuerSigningKey = true,
 				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["llavejwt"])),
 				ClockSkew = TimeSpan.Zero
-			}); 
+			});
 
 			services.AddEndpointsApiExplorer();
 			services.AddSwaggerGen(c =>
@@ -87,7 +87,15 @@ namespace WebAPIAutores
 
 			services.AddAutoMapper(typeof(Startup));
 
-			services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+			services.AddIdentity<IdentityUser, IdentityRole>()
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
+
+			services.AddAuthorization(opciones =>
+			{
+				opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
+			});
+			
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
