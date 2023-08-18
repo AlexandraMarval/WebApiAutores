@@ -74,7 +74,8 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
-		[HttpGet]// Model Binding/		
+		[HttpGet]// Model Binding/
+		[AllowAnonymous]
 		public async Task<ActionResult<List<Autor>>> PrimerAutor([FromHeader] int miValor )
 		{
 			var autores = await context.Autores.ToListAsync();

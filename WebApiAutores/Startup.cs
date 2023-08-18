@@ -95,6 +95,16 @@ namespace WebAPIAutores
 			{
 				opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
 			});
+
+			services.AddDataProtection();
+
+			services.AddCors(opciones =>
+			{
+				opciones.AddDefaultPolicy(builder =>
+				{
+					builder.WithOrigins("https://www.apirequest.io").AllowAnyMethod().AllowAnyHeader();
+				});
+			});
 			
 		}
 
@@ -123,6 +133,8 @@ namespace WebAPIAutores
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
+
+			app.UseCors();
 
 			app.UseResponseCaching();
 

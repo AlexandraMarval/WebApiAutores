@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -17,15 +18,50 @@ namespace WebAPIAutores.Controllers
 		private readonly UserManager<IdentityUser> userManager;
 		private readonly IConfiguration configuration;
 		private readonly SignInManager<IdentityUser> signInManager;
+		private readonly IDataProtector dataProtector;
 
-		public CuentasController(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager)
+		public CuentasController(UserManager<IdentityUser> userManager, IConfiguration configuration, SignInManager<IdentityUser> signInManager, IDataProtectionProvider dataProtectionProvider)
         {
 			this.userManager = userManager;
 			this.configuration = configuration;
 			this.signInManager = signInManager;
+			dataProtector = dataProtectionProvider.CreateProtector("Valor_inico_y_quizas_secreto");
 		}
 
-        [HttpPost("registrar")] // api/cuentas/registrar
+		[HttpGet("encreiptar")]
+		public ActionResult Encriptar()
+		{
+			var textoPlano = "Alexandra marval";
+			var textoCifrado = dataProtector.Protect(textoPlano);
+			var textoDesencriptado = dataProtector.Unprotect(textoCifrado);
+
+			return Ok( new
+			{
+				textoPlano = textoPlano,
+				textoCifrado = textoCifrado,
+				textoDesencriptado = textoDesencriptado
+			});
+		}
+
+		[HttpGet("encriptadoPorTiempo")]
+		public ActionResult EncriptarPorTiempo()
+		{
+			var protectorLimitadoPorTiempo = dataProtector.ToTimeLimitedDataProtector();
+
+			var textoPlano = "Alexandra marval";
+			var textoCifrado = protectorLimitadoPorTiempo.Protect(textoPlano, lifetime: TimeSpan.FromSeconds(5));
+			Thread.Sleep(6000);
+			var textoDesencriptado = protectorLimitadoPorTiempo.Unprotect(textoCifrado);
+
+			return Ok(new
+			{
+				textoPlano = textoPlano,
+				textoCifrado = textoCifrado,
+				textoDesencriptado = textoDesencriptado
+			});
+		}
+
+		[HttpPost("registrar")] // api/cuentas/registrar
 		public async Task<ActionResult<RespuestasAutenticacionDTO>> Registrar(CredencialesUsuario credencialesUsuario)
 		{
 			var usuario = new IdentityUser { UserName = credencialesUsuario.Email, Email = credencialesUsuario.Email };
@@ -33,7 +69,7 @@ namespace WebAPIAutores.Controllers
 
 			if (resultado.Succeeded)
 			{
-				return ConstruirToken(credencialesUsuario);
+				return await ConstruirToken(credencialesUsuario);
 			}
 			else
 			{
@@ -47,16 +83,17 @@ namespace WebAPIAutores.Controllers
 
 			if (resultado.Succeeded)
 			{
-				return ConstruirToken(credencialesUsuario);
+				return await ConstruirToken(credencialesUsuario);
 			}
 			else
 			{
 				return BadRequest("Login Incorrecto");
 			}
 		}
+
 		[HttpGet("RenovarToken")]
 		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-		public ActionResult<RespuestasAutenticacionDTO> Renovar()
+		public async Task<ActionResult<RespuestasAutenticacionDTO>> Renovar()
 		{
 			var emailClaim = HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.Email)
 				.FirstOrDefault();
@@ -66,16 +103,22 @@ namespace WebAPIAutores.Controllers
 				Email = email
 			};
 
-			return ConstruirToken(credencialesUsuario);
+			return await ConstruirToken(credencialesUsuario);
 		}
 
-		private RespuestasAutenticacionDTO ConstruirToken(CredencialesUsuario credencialesUsuario)
+		private async Task<RespuestasAutenticacionDTO> ConstruirToken(CredencialesUsuario credencialesUsuario)
 		{
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.Email, credencialesUsuario.Email),		
 				new Claim("lo que yo quiera", "Cualquier otro valor")			
 			};
+
+			var usuario = await userManager.FindByEmailAsync(credencialesUsuario.Email);
+			var claimsDB = await userManager.GetClaimsAsync(usuario);
+
+			claims.AddRange(claimsDB);
+
 			var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
 			var credenciales = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
 
