@@ -1,0 +1,30 @@
+{
+  "id": 0,
+  "nombre": "Yeico",
+  "sexo": "Masculino",
+  "edad": 20,
+  "raza": "PastorAleman",
+  "peso": 15,
+  "people": {
+    "id": 0,
+    "nombre": "Santiago",
+    "apellido": "Sandoval",
+    "dirección": "Calle Reina Sofia",
+    "telefono": 698325144,
+    "pets": [
+		{
+		  "id": 0,
+		  "nombre": "Yeico",
+		  "sexo": "Masculino",
+		  "edad": 20,
+		  "raza": "PastorAleman",
+		  "peso": 15
+		}
+	]
+  }
+}
+ "email": "AlexandraMarval@Hotmail.com",
+  "password": "Am12345$$"
+  auth/index
+  ssalazar
+  123456

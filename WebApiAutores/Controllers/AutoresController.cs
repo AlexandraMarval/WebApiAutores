@@ -53,7 +53,18 @@ namespace WebAPIAutores.Controllers
 		//		AutoresControllerSingleton = servicioSingleton.Guid,
 		//		ServicioA_Singleton = service.ObtenerSingleton(),
 		//	});
-		//}
+		//} 
+		[HttpGet("int:id")]
+		public async Task<ActionResult<AutorDTO>> Get(int id)
+		{
+			var autor = await context.Autores.FirstAsync(autor => autor.Id == id);
+			var respuesta = new AutorDTO
+			{
+				Id = autor.Id,
+				Nombre = autor.Nombre
+			};
+			return respuesta;			
+		}
 
 		[HttpGet("configuraciones")]
 		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -62,7 +73,7 @@ namespace WebAPIAutores.Controllers
 			return configuration["nombre"];
 		}
 
-		[HttpGet("listado")]		
+		[HttpGet("listado", Name = "obtenerListadoDeAutores")]		
 		//[Authorize]
 		//[ResponseCache(Duration = 10)]
 		//[ServiceFilter(typeof(MiFiltroDeAccion))]
@@ -74,7 +85,7 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
-		[HttpGet]// Model Binding/
+		[HttpGet(Name = "obtenerAutores")]// Model Binding/
 		[AllowAnonymous]
 		public async Task<ActionResult<List<Autor>>> PrimerAutor([FromHeader] int miValor )
 		{
@@ -101,7 +112,7 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<AutorDTOConLibros>(autor);	
 		}
 
-		[HttpGet("nombre")]
+		[HttpGet("por-nombre", Name = "obtenerAutoresPorNombre")]
 		[AllowAnonymous] // Se utiliza para las personas que no necesitan autenticarse
 		public async Task<ActionResult<List<AutorDTO>>> GetNombreAutor(string nombre)
 		{
@@ -110,7 +121,7 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<List<AutorDTO>>(autores);
 		}
 
-		[HttpPost]
+		[HttpPost(Name = "crearAutor")]
 		public async Task<ActionResult> PostAutor([FromBody] AutorCreacionDTO autorCreacionDTO)
 		{
 			var existeAutorConElMismoNombre = await context.Autores.AnyAsync(autor => autor.Nombre == autorCreacionDTO.Nombre);
@@ -130,7 +141,7 @@ namespace WebAPIAutores.Controllers
 			return CreatedAtRoute("obtenerAutorId", new { id = autor.Id}, autorDTO);
 		}
 
-		[HttpPut("{id:int}")]
+		[HttpPut("{id:int}", Name = "actualizarAutor")]
 		public async Task<ActionResult> PutActualizarActores(AutorCreacionDTO autorCreacionDTO, int id)
 		{		
 			var existe = await context.Autores.AnyAsync(autor => autor.Id == id);
@@ -147,7 +158,7 @@ namespace WebAPIAutores.Controllers
 			return NoContent();
 		}
 
-		[HttpDelete("{id:int}")]
+		[HttpDelete("{id:int}", Name = "eliminarAutor")]
 		public async Task<ActionResult> DeleteAutor(int id)
 		{
 			var existe = await context.Autores.AnyAsync(autor => autor.Id == id);

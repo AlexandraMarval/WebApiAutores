@@ -86,6 +86,7 @@ namespace WebAPIAutores
 			});
 
 			services.AddAutoMapper(typeof(Startup));
+			services.AddTransient<HashService>(); 
 
 			services.AddIdentity<IdentityUser, IdentityRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
