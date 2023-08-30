@@ -112,6 +112,11 @@ namespace WebAPIAutores.Controllers
 			return mapper.Map<AutorDTOConLibros>(autor);	
 		}
 
+		private void GenerarEnlaces(AutorDTO autorDTO)
+		{
+
+		}
+
 		[HttpGet("por-nombre", Name = "obtenerAutoresPorNombre")]
 		[AllowAnonymous] // Se utiliza para las personas que no necesitan autenticarse
 		public async Task<ActionResult<List<AutorDTO>>> GetNombreAutor(string nombre)

@@ -23,7 +23,7 @@ namespace WebAPIAutores.Controllers
 		{
 			var datosHateaos = new List<DatosHATEOAS>();
 
-			var esAdmin = await authorizationService.AuthorizeAsync(User, "esAdmin");
+			var esAdmin = await authorizationService.AuthorizeAsync(User, "esAdmin", "2");
 
 			datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("ObtenerRoot", new { }), descripcion: "self", metodo: "GET"));
 
