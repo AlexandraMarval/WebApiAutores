@@ -21,21 +21,29 @@ namespace WebAPIAutores.Controllers
 		[AllowAnonymous]
 		public async Task<ActionResult<IEnumerable<DatosHATEOAS>>> Get()
 		{
-			var datosHateaos = new List<DatosHATEOAS>();
-
-			var esAdmin = await authorizationService.AuthorizeAsync(User, "esAdmin", "2");
-
-			datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("ObtenerRoot", new { }), descripcion: "self", metodo: "GET"));
-
-			datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("obtenerAutores", new { }), descripcion: "autores", metodo: "GET"));
-
-			if (esAdmin.Succeeded)
-			{
-				datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("crearAutor", new { }), descripcion: "autor-crear", metodo: "POST"));
-
-				datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("crearLibro", new { }), descripcion: "libro-crear", metodo: "POST"));
-			}
-			return datosHateaos;
+		try
+		{
+				var datosHateaos = new List<DatosHATEOAS>();
+	
+				var esAdmin = await authorizationService.AuthorizeAsync(User, "esAdmin", "1");
+	
+				datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("ObtenerRoot", new { }), descripcion: "self", metodo: "GET"));
+	
+				datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("obtenerAutores", new { }), descripcion: "autores", metodo: "GET"));
+	
+				if (esAdmin.Succeeded)
+				{
+					datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("crearAutor", new { }), descripcion: "autor-crear", metodo: "POST"));
+	
+					datosHateaos.Add(new DatosHATEOAS(enlace: Url.Link("crearLibro", new { }), descripcion: "libro-crear", metodo: "POST"));
+				}
+				return datosHateaos;
+		}
+		catch (System.Exception ex)
+		{
+			
+			throw ex;
+		}
 		}
 	}
 }

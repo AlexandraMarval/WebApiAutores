@@ -29,7 +29,7 @@ namespace WebAPIAutores.Controllers
 		[HttpGet(Name = "obtenerComentariosLibros")]
 		public async Task<ActionResult<List<ComentarioDTO>>> GetComentarios(int libroId)
 		{
-			var existeLibro = await context.Libros.AnyAsync(libro => libroId == libroId);
+			var existeLibro = await context.Libros.AnyAsync(libro => libro.Id == libroId);
 
 			if (!existeLibro)
 			{

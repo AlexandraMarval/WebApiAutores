@@ -153,9 +153,8 @@ namespace WebAPIAutores.Controllers
 		public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
 		{
 			var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);			
-			await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "2"));				
+			await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));				
 			return NoContent();
-
 		}
 
 		[HttpPost("RemoverAdmin", Name = "RemoverAdministrador")]

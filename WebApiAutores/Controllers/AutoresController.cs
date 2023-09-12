@@ -82,7 +82,9 @@ namespace WebAPIAutores.Controllers
 		//	logger.LogInformation("Estamos obteniendo los autores");
 		//	logger.LogWarning("Este es un mensaje de prueba");
 			var autores = await context.Autores.ToListAsync();
-			return mapper.Map<List<AutorDTO>>(autores);
+			var dtos = mapper.Map<List<AutorDTO>>(autores);
+			dtos.ForEach(dtos => GenerarEnlaces(dtos));
+			return dtos;
 		}
 
 		[HttpGet(Name = "obtenerAutores")]// Model Binding/
@@ -95,7 +97,7 @@ namespace WebAPIAutores.Controllers
 		// podemos poner rutas con restricciones o podemos poner ruta opcionales o lo que queramos
 		// El NotFound hereda de ActionResult/ La diferencia de ActionResult de T a IActionResult es que con IActionResult no puedo retornar  un autor 
 
-		[HttpGet("{id:int}", Name ="obtenerAutorId")]
+		[HttpGet("{id:int}", Name ="obtenerAutor")]
 		[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 		public async Task<ActionResult<AutorDTOConLibros>> GetPrimerAutor(int id)
 		{																
@@ -109,12 +111,16 @@ namespace WebAPIAutores.Controllers
 				return NotFound();
 			}
 
-			return mapper.Map<AutorDTOConLibros>(autor);	
+			var DTO = mapper.Map<AutorDTOConLibros>(autor);
+			GenerarEnlaces(DTO);
+			return DTO;
 		}
 
 		private void GenerarEnlaces(AutorDTO autorDTO)
 		{
-
+			autorDTO.Enlaces.Add(new DatosHATEOAS(Url.Link("obtenerAutor", new { id = autorDTO.Id }), descripcion: "self", metodo: "GET"));
+			autorDTO.Enlaces.Add(new DatosHATEOAS(Url.Link("actualizarAutor", new { id = autorDTO.Id }), descripcion: "autor-actualizar", metodo: "PUT"));
+			autorDTO.Enlaces.Add(new DatosHATEOAS(Url.Link("eliminarAutor", new { id = autorDTO.Id }), descripcion: "autor-eliminar", metodo: "DELETE"));
 		}
 
 		[HttpGet("por-nombre", Name = "obtenerAutoresPorNombre")]
