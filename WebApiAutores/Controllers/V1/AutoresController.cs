@@ -15,8 +15,10 @@ using static WebAPIAutores.Servicios.ServicioB;
 namespace WebApiAutores.Controllers.V1
 {
     [ApiController]
-    [Route("api/v1/autores")]
-    //[Authorize]
+    [Route("api/autores")]
+    [CabeceraEstaPresente("x-version", "1")]
+    //[Route("api/v1/autores")]
+    ////[Authorize]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
     public class AutoresController : ControllerBase
     {
