@@ -20,6 +20,7 @@ namespace WebApiAutores.Controllers.V1
     //[Route("api/v1/autores")]
     ////[Authorize]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -115,7 +116,6 @@ namespace WebApiAutores.Controllers.V1
         [HttpGet("{id:int}", Name = "obtenerAutorV1")]
         [AllowAnonymous]
         [ServiceFilter(typeof(HATEAOSAutorFilterAttribute))]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<AutorDTOConLibros>> GetPrimerAutor(int id)
         {
             var autor = await context.Autores
