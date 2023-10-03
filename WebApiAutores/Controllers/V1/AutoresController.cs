@@ -20,7 +20,6 @@ namespace WebApiAutores.Controllers.V1
     //[Route("api/v1/autores")]
     ////[Authorize]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
-    [ApiConventionType(typeof(DefaultApiConventions))]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -90,7 +89,7 @@ namespace WebApiAutores.Controllers.V1
         //[Authorize]
         //[ResponseCache(Duration = 10)]
         //[ServiceFilter(typeof(MiFiltroDeAccion))]
-        public async Task<ActionResult<List<AutorDTO>>> GetAutor()
+        public async Task<ActionResult<List<AutorDTO>>> GetAutor([FromQuery] PaginacionDTO paginacionDTO)
         {
             //	logger.LogInformation("Estamos obteniendo los autores");
             //	logger.LogWarning("Este es un mensaje de prueba");
