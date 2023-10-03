@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebApiAutores.Servicios;
@@ -63,10 +64,20 @@ namespace WebAPIAutores
 			services.AddEndpointsApiExplorer();
 			services.AddSwaggerGen(c =>
 			{
-				c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebApiAutores", Version = "v1" });
+				c.SwaggerDoc("v1", new OpenApiInfo { 
+					Title = "WebApiAutores", 
+					Version = "v1",
+					Description = "Este es una web Api de autores y libros",
+					Contact = new OpenApiContact
+					{
+						Email = "Alexandrai.marvala@gamil.com",
+						Name = "Alexandra MArval",
+					}
+				});
 				c.SwaggerDoc("v2", new OpenApiInfo { Title = "WebApiAutores", Version = "v2" });
 
 				c.OperationFilter<AgregarParametrosHATEAOS>();
+				c.OperationFilter<AgregarParametroXVersion>();
 				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 				{
 					Name = "Authorization",
@@ -90,7 +101,11 @@ namespace WebAPIAutores
 						new string[]{}
 					}
 				});
-			});
+
+                var archivoXML = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var rutaXML = Path.Combine(AppContext.BaseDirectory, archivoXML);
+                c.IncludeXmlComments(rutaXML);
+            });
 
 			services.AddAutoMapper(typeof(Startup));
 			services.AddTransient<HashService>(); 

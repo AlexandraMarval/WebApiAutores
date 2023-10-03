@@ -79,6 +79,10 @@ namespace WebApiAutores.Controllers.V1
         //	return configuration["nombre"];
         //}
 
+        /// <summary>
+        /// listado de autores
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("listado", Name = "obtenerListadoDeAutoresV1")]
         [AllowAnonymous]
         [ServiceFilter(typeof(HATEAOSAutorFilterAttribute))]
@@ -103,9 +107,15 @@ namespace WebApiAutores.Controllers.V1
         // podemos poner rutas con restricciones o podemos poner ruta opcionales o lo que queramos
         // El NotFound hereda de ActionResult/ La diferencia de ActionResult de T a IActionResult es que con IActionResult no puedo retornar  un autor 
 
+        /// <summary>
+        /// obtener autor por id
+        /// </summary>
+        /// <param name="id">Obtener un autor</param>
+        /// <returns></returns>
         [HttpGet("{id:int}", Name = "obtenerAutorV1")]
         [AllowAnonymous]
         [ServiceFilter(typeof(HATEAOSAutorFilterAttribute))]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<AutorDTOConLibros>> GetPrimerAutor(int id)
         {
             var autor = await context.Autores
@@ -122,6 +132,11 @@ namespace WebApiAutores.Controllers.V1
             return DTO;
         }
 
+        /// <summary>
+        /// obtener autor por nombre
+        /// </summary>
+        /// <param name="nombre">Obtener autor por nombre</param>
+        /// <returns></returns>
         [HttpGet("por-nombre", Name = "obtenerAutoresPorNombreV1")]
         [AllowAnonymous] // Se utiliza para las personas que no necesitan autenticarse
         public async Task<ActionResult<List<AutorDTO>>> GetNombreAutor(string nombre)
@@ -130,7 +145,11 @@ namespace WebApiAutores.Controllers.V1
 
             return mapper.Map<List<AutorDTO>>(autores);
         }
-
+        /// <summary>
+        /// crear autor
+        /// </summary>
+        /// <param name="autorCreacionDTO">Crear un autor</param>
+        /// <returns></returns>
         [HttpPost(Name = "crearAutorV1")]
         public async Task<ActionResult> PostAutor([FromBody] AutorCreacionDTO autorCreacionDTO)
         {
@@ -150,7 +169,12 @@ namespace WebApiAutores.Controllers.V1
 
             return CreatedAtRoute("obtenerAutorIdV1", new { id = autor.Id }, autorDTO);
         }
-
+        /// <summary>
+        /// actualizar un autor
+        /// </summary>
+        /// <param name="autorCreacionDTO">Actualizar autor por id</param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPut("{id:int}", Name = "actualizarAutorV1")]
         public async Task<ActionResult> PutActualizarActores(AutorCreacionDTO autorCreacionDTO, int id)
         {
@@ -168,6 +192,11 @@ namespace WebApiAutores.Controllers.V1
             return NoContent();
         }
 
+        /// <summary>
+        /// Borra un autor
+        /// </summary>
+        /// <param name="id">Id del autor a borrar</param>
+        /// <returns></returns>
         [HttpDelete("{id:int}", Name = "eliminarAutorV1")]
         public async Task<ActionResult> DeleteAutor(int id)
         {
