@@ -93,7 +93,9 @@ namespace WebApiAutores.Controllers.V1
         {
             //	logger.LogInformation("Estamos obteniendo los autores");
             //	logger.LogWarning("Este es un mensaje de prueba");
-            var autores = await context.Autores.ToListAsync();
+            var queryable = context.Autores.AsQueryable();
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
+            var autores = await queryable.OrderBy(autor => autor.Nombre).Paginar(paginacionDTO).ToListAsync();
             return mapper.Map<List<AutorDTO>>(autores);
         }
 
