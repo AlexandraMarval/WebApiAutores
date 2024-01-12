@@ -18,6 +18,5 @@ namespace WebAPIAutores.Filtros
 		{
 			logger.LogInformation("Despues de ejecutar la acción");
 		}
-
 	}
 }
